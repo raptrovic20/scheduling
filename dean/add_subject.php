@@ -87,15 +87,16 @@
     <div class="controls">
    <select name="year_level" id="span9009" required>
 	<option>--Select Year Level--</option>
-	<option value="First Year">1st Year</option>
-	<option value="Second Year">2nd Year</option>
-    <option value="Third Year">3rd Year</option>
-    <option value="Fourth Year">4th Year</option>
-    <option value="Fifth Year">5th Year</option>
+	<option value="1">1st Year</option>
+	<option value="2">2nd Year</option>
+    <option value="3">3rd Year</option>
+    <option value="4">4th Year</option>
+    <option value="5">5th Year</option>
 	</select>
     </div>
     </div>
 	<input type="hidden" name="semester" value="<?php echo $_SESSION['semester'] ?>">
+	<input type="hidden" name="school_year" value="<?php echo $_SESSION['school_year'] ?>">
 	<!--<div class="control-group">
 		<label class="control-label" for="input01">Semester:</label>
 		<div class="controls">
@@ -118,7 +119,7 @@
 <?php $query=mysql_query("select * from tbl_course")or die(mysql_error);
 while($dep=mysql_fetch_array($query)){
  ?>
- <option><?php echo $dep['course_name'];?></option>
+ <option value="<?php echo $dep['course_id'];?>"><?php echo $dep['course_name'];?></option>
  <?php }?>
 	</select>
     </div>

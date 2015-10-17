@@ -53,6 +53,92 @@
 	function get_subjects(){
 		$conn = conn();
 		
+		$sql = 'SELECT * FROM tbl_subject WHERE year_level = '.$_POST['year_level'].' AND course = '.$_POST['course_id'].' AND semester = '.$_POST['sem'];
+		
+		$result = mysql_query($sql);
+		$res['status'] = 'failed';
+		
+		$prof_sql = '
+						SELECT 
+						  * 
+						FROM
+						  tbl_faculty 
+						WHERE tbl_faculty.`emp_no`';
+		$prof_result = mysql_query($prof_sql);
+		$prof_count = mysql_num_rows($prof_result);
+		while($prof = mysql_fetch_assoc($prof_result)){
+			$profs[] = $prof;
+		}
+		
+		$room_sql = '
+						SELECT 
+						  * 
+						FROM
+						  tbl_room 
+						WHERE tbl_room.`room_id`';
+		$room_result = mysql_query($room_sql);
+		$room_count = mysql_num_rows($room_result);
+		while($room = mysql_fetch_assoc($room_result)){
+			$rooms[] = $room;
+		}
+		// die(_a($rooms));
+		if(mysql_num_rows($result) > 0){
+			echo '<form action="ajax_function.php" id="sched_form" method="post">';
+			echo '<input type="hidden" name="function_name" id="function_name" value="save_sched">';
+			echo '<table border="1">
+						<tr>
+							<td style="width:20%">Subject Code</td>
+							<td style="width:20%">Subject Description</td>
+							<td style="width:10%">Start/End Time</td>
+							<td style="width:15%">Days</td>
+							<td style="width:15%">Room</td>
+							<td style="width:20%">Instructor</td>
+						</tr>';
+			while($row=mysql_fetch_assoc($result)){
+				echo '<input type="hidden" name="subject_id[]" value="'.$row['subject_id'].'">';
+				echo 	'<tr>';
+				echo 		'<td>'.$row['subject_code'].'</td>';
+				echo 		'<td>'.$row['description'].'</td>';
+				echo 		'<td>
+								<div class="datepicker_div">
+									<input name="'.$row['subject_id'].'[time_from]" value="" type="text" readonly="readonly" class="datepicker time start time_start">
+									<input name="'.$row['subject_id'].'[time_to]" value="" type="text" readonly="readonly" class="datepicker time end time_end">
+								<div>
+							</td>';
+				echo 		'<td>
+								<input name="'.$row['subject_id'].'[days][]" class="sched_form_days" value="monday" type="checkbox"> Monday<br/> 
+								<input name="'.$row['subject_id'].'[days][]" value="tuesday" type="checkbox"> Tuesday<br/> 
+								<input name="'.$row['subject_id'].'[days][]" value="wednesday" type="checkbox"> Wednesday<br/> 
+								<input name="'.$row['subject_id'].'[days][]" value="thursday" type="checkbox"> Thursday<br/> 
+								<input name="'.$row['subject_id'].'[days][]" value="friday" type="checkbox"> Friday<br/> 
+								<input name="'.$row['subject_id'].'[days][]" value="saturday" type="checkbox"> Saturday</td>';
+				echo 		'<td>
+								<select style="width:100%" id="room_select" name="'.$row['subject_id'].'[room_select]">';
+					foreach($rooms as $room){
+						echo 		'<option value="'.$room['room_id'].'">'.$room['room_name'].' ('.$room['room_no'].')</option>';
+					}
+				echo			'</select>
+							</td>';
+				echo 		'<td>
+								<select style="width:100%" id="prof_select" name="'.$row['subject_id'].'[prof_select]">';
+					foreach($profs as $prof){
+						echo 		'<option value="'.$prof['emp_no'].'">'.$prof['fname'].' '.$prof['mname'].' '.$prof['lname'].'</option>';
+					}
+				echo			'</select>
+							</td>';
+				echo 	'<tr>';
+			}
+			echo '</table>';
+			echo '</form>';
+		}
+		else{
+			echo 'No subject assigned to this block';
+		}
+	}
+	
+	function get_subjects_10172015(){
+		$conn = conn();
+		
 		$block_query = 'select * from tbl_blocks where id = '.$_POST['block_id'];
 		$block = mysql_fetch_assoc(mysql_query($block_query));
 		// die(_a($block));
@@ -490,6 +576,54 @@
 	}
 	
 	function save_sched(){
+		$post = $_POST;
+		$conn = conn();
+		
+		$data = array();
+		$conflicted = array();
+		foreach($post['subject_id'] as $subject_id){
+			$days = array(
+						'monday' => 0, 
+						'tuesday' => 0, 
+						'wednesday' => 0, 
+						'thursday' => 0, 
+						'friday' => 0, 
+						'saturday' => 0
+					);
+			
+			$day_where = "";
+			foreach($post[$subject_id]['days'] as $day){
+				$days[$day] = 1;
+			}
+			
+			foreach($post['subject_id'] as $_sub){
+				if($subject_id == $_sub){
+					continue;
+				}
+				
+				if(($post[$subject_id]['time_from'] >= $post[$_sub]['time_from'] and $post[$subject_id]['time_from'] < $post[$_sub]['time_to']) 
+					or ($post[$subject_id]['time_to'] >= $post[$_sub]['time_from'] and $post[$subject_id]['time_to'] < $post[$_sub]['time_to'])
+				){
+					foreach($post[$_sub]['days'] as $day){
+						if($days[$day] == 1){
+							$conflicted[$subject_id]['subject_id'] = $subject_id;
+							$conflicted[$subject_id]['days'][] = $day;
+						}
+					}
+				}
+			}
+		}
+		
+		if(count($conflicted) > 0){
+			$response['conflicted'] = "true";
+		}
+		
+		$response['conflicted_data'] = $conflicted;
+		
+		echo json_encode($response);
+	}
+	
+	function save_sched_10172015(){
 		$post = $_POST;
 
 		$conn = conn();

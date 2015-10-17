@@ -73,11 +73,10 @@
 					Blocks: 
 					<select id="block_select" name="block_select">
 						<option>-Select One-</option>
-						<option>asdf</option>
 					</select>
 				</div>
 				<div style="float:left;width:21%;">
-					<input type="button" id="sy-sem-button" value="Submit">
+					<input type="button" id="save_schedule_button" value="Save">
 				</div>
 			</div>
 			<div style="margin-top:50px">
@@ -86,26 +85,8 @@
 					<div class="list-group" id="list_of_courses">
 					</div>
 				</div>
-				<div id="year_level_div" style="float:left;width:15%;background-color:#fff;margin-right:3.3%;text-align:center;display:none">
-					<h3>Year Level</h3><br/>
-					<div class="list-group" id="list_of_year_level">
-					</div>
-				</div>
-				<div id="blocks" style="float:left;width:15%;background-color:#fff;margin-right:3.3%;display:none;text-align:center">
-					<h3>Blocks</h3><br/>
-					<div class="list-group" id="list_of_blocks">
-					</div>
-				</div>
-				<div id="subjects" style="float:left;width:15%;background-color:#fff;margin-right:3.3%;display:none;text-align:center">
-					<h3>Subjects</h3><br/>
-					<div class="list-group" id="list_of_subjects">
-					</div>
-				</div>
-				<div id="subject_info" style="float:left;width:21%;background-color:#fff;margin-right:3.3%;text-align:center;display:none">
-					<h3>Subject Info</h3><br/>
-					<div id="subject_info_div" style="width:97%;margin-left: auto; margin-right: auto;">
-						
-					</div>
+				<div id="subjects" style="float:left;width:75%;background-color:#fff;text-align:center">
+					
 				</div>
 			</div>
 		</div>	
@@ -132,9 +113,14 @@
 <script type="text/javascript">
 	$(document).ready(function() {
 		get_courses();
-		$( "#sy-sem-button" ).click(function() {
-			$("#blocks, #subjects, #subject_info, #courses").hide();
-			get_courses();
+		$( "#save_schedule_button" ).click(function() {
+			$("#sched_form").submit();
+		});
+		
+		$( "#block_select" ).change(function() {
+			var year_level = $('option:selected', this).attr('year-level');
+			var course_id = $('option:selected', this).attr('course-id');
+			get_subjects($(this).val(), course_id, year_level);
 		});
 	});
 	
@@ -183,24 +169,46 @@
 				if(result.status == "success"){
 					html = "<option>-Select One-</option>";
 					$.each(result.data, function (key, data) {
-						// html += '<a href="#" class="list-group-item block_item" block-id="'+data.id+'">'+data.name+'</a>'
-						html += '<option>'+data.name+'</option>';
+						html += '<option course-id="'+course_id+'" year-level="'+year_level+'" value="'+data.id+'">'+data.name+'</option>';
 					});
-					// $("#list_of_blocks").html(html);
+					
 					$("#block_select").html(html);
-					// $("#blocks").show('slide', { direction: 'left' });
-					$( ".block_item" ).click(function() {
-						$("#subjects, #subject_info").hide();
-						$('.block_item').removeClass('active');
-						$(this).addClass('active');
-						get_subjects($(this).attr("block-id"),course_id,year_level);
-					});
 				}
 				else{
-					// $("#list_of_blocks").html('No block/section for this course');
 					$("#block_select").html('<option>No block/section for this course</option>');
-					// $("#blocks").show('slide', { direction: 'left' });
 				}
+			}
+		});
+	}
+	
+	function get_subjects(block_id, course_id, year_level){
+		$("#subjects").hide();
+		$.ajax({
+			url: "ajax_function.php",
+			data: {function_name : 'get_subjects', block_id : block_id, school_year : $("#SY").val(), sem : $("#sem").val(), year_level : year_level, course_id : course_id},
+			type: 'post',
+			dataType: 'html',
+			success: function(result){
+				$("#subjects").html(result);
+				$('.datepicker').timepicker({ 'step': 5,'timeFormat': 'h:i A','useSelect':true,'minTime': '4:00am','maxTime': '11:00pm', });
+				$('.datepicker_div').datepair();
+				$("#subjects").show('slide', { direction: 'left' });
+				$('#sched_form').ajaxForm({
+					dataType: 'json',
+					beforeSubmit: function(){
+						$("#error_message").html("");
+					},
+					success: function(response){
+						if(response.status == "success"){
+							$("#sched_form_modal").modal('hide');
+							$("#subject_info").hide();
+							get_subject_info(block_id,subject_id);
+						}
+						else{
+							$("#error_message").html(response.message);
+						}
+					}
+				}); 
 			}
 		});
 	}

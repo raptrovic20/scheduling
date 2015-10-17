@@ -10,7 +10,9 @@ $type=$_POST['type'];
 $unit=$_POST['unit'];
 $course=$_POST['course'];
 $year_level=$_POST['year_level'];
+// die($year_level);
 $semester=$_POST['semester'];
+$school_year=$_POST['school_year'];
 
 
 $query=mysql_query("select * from tbl_subject where subject_code='$subject_code'
@@ -29,8 +31,8 @@ window.location="add_subject.php";
 </script>
 <?php 
 }else{
-mysql_query("insert into tbl_subject (subject_code,description,type,unit,course,year_level,semester)
-VALUES('$subject_code','$description','$type','$unit','$course','$year_level','$semester')")or die(mysql_error());
+mysql_query("insert into tbl_subject (subject_code,description,type,unit,course,year_level,semester,school_year)
+VALUES('$subject_code','$description','$type','$unit','$course','$year_level','$semester','$school_year')")or die(mysql_error());
 
 
 
