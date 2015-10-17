@@ -1,0 +1,454 @@
+<?php include('header.php'); include('session.php'); include('dbcon.php') ?>
+<body>
+<?php include('nav-top1.php'); ?>
+<?php
+	$sql = 'SELECT * FROM tbl_school_year';
+	$school_year = mysql_query($sql);
+?>
+<br>
+    <div class="navbar navbar-fixed-top1">
+		<div class="navbar-inner">
+			<div class="container">
+				<div class="marg">
+					<ul class="nav">
+						<li>
+							<a href="home.php"><i class="icon-home icon-large"></i>Home</a>
+						</li>
+						<li class="divider-vertical"></li>
+						<li><a href="blocks.php"><i class="icon-group icon-large"></i>Blocks</a></li>
+						<li class="divider-vertical"></li>
+						<li><a href="subject.php"><i class="icon-group icon-large"></i>Subject</a></li>
+						<li class="divider-vertical"></li>
+						<li><a href="faculty.php"><i class="icon-user icon-large"></i>Faculty</a></li>
+						<li class="divider-vertical"></li>
+						<li class="active"><a href="subjectsched.php"><i class="icon-table icon-large"></i>Subject Schedule</a></li>
+						<li class="divider-vertical"></li>
+						<li><a href="checklist.php"><i class="icon-table icon-large"></i>Check List</a></li>
+						<li class="divider-vertical"></li>
+						<li><a href="account.php"><i class="icon-table icon-large"></i>Account</a></li>
+						<li class="divider-vertical"></li>
+						<li><a id="logout" data-toggle="modal" href="#myModal"><i class="icon-signout icon-large"></i>Logout</a></li>
+						<li class="divider-vertical"></li>
+					</ul>
+				</div>
+			</div>
+		</div>
+    </div>
+	<div class="wrapper">
+		<div id="element" class="hero-body">
+			<div style="width:100%;float:left;background-color:#fff;">
+				<input type="hidden" name="SY" id="SY" value="<?php echo $_SESSION['school_year'] ?>">
+				<!--<input type="hidden" name="sem" id="sem" value="<?php echo $_SESSION['semester'] ?>">-->
+				<div style="float:left;width:21%;">
+					Semester: 
+					<select id="sem" name="sem">
+						<option value="1">1st Semester</option>
+						<option value="2">2nd Semester</option>
+						<option value="3">Summer</option>
+					</select>
+				</div>
+				<!--<div style="float:left;width:21%;margin-left:20px">
+					School Year: 
+					<select id="SY" name="SY">
+						<?php 
+							while($row=mysql_fetch_assoc($school_year)){
+								$selected = "";
+								if($row['id'] == 6) $selected = 'selected = "selected"';
+								echo '<option '.$selected.' value="'.$row['id'].'">'.$row['from'].' - '.$row['to'].'<option>';
+							}
+						?>
+					</select>
+				</div>-->
+				<div style="float:left;width:21%;">
+					Year Level: 
+					<select id="year_level" name="year_level">
+						<option value="1">1st Year</option>
+						<option value="2">2nd Year</option>
+						<option value="3">3rd Year</option>
+						<option value="4">4th Year</option>
+						<option value="5">5th Year</option>
+					</select>
+				</div>
+				<div style="float:left;width:21%;">
+					<input type="button" id="sy-sem-button" value="Submit">
+				</div>
+			</div>
+			<div style="margin-top:50px">
+				<div id="courses" style="float:left;width:15%;background-color:#fff;margin-right:3.3%;text-align:center;display:none">
+					<h3>Courses</h3><br/>
+					<div class="list-group" id="list_of_courses">
+					</div>
+				</div>
+				<div id="year_level_div" style="float:left;width:15%;background-color:#fff;margin-right:3.3%;text-align:center;display:none">
+					<h3>Year Level</h3><br/>
+					<div class="list-group" id="list_of_year_level">
+					</div>
+				</div>
+				<div id="blocks" style="float:left;width:15%;background-color:#fff;margin-right:3.3%;display:none;text-align:center">
+					<h3>Blocks</h3><br/>
+					<div class="list-group" id="list_of_blocks">
+					</div>
+				</div>
+				<div id="subjects" style="float:left;width:15%;background-color:#fff;margin-right:3.3%;display:none;text-align:center">
+					<h3>Subjects</h3><br/>
+					<div class="list-group" id="list_of_subjects">
+					</div>
+				</div>
+				<div id="subject_info" style="float:left;width:21%;background-color:#fff;margin-right:3.3%;text-align:center;display:none">
+					<h3>Subject Info</h3><br/>
+					<div id="subject_info_div" style="width:97%;margin-left: auto; margin-right: auto;">
+						
+					</div>
+				</div>
+			</div>
+		</div>	
+		<?php include('footer.php');?>
+	</div>
+</body>
+<div class="modal hide fade" id="myModal">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal">X</button>
+	</div>
+	<div class="modal-body">
+	    <p><font color="gray">Are You Sure you Want to LogOut?</font></p>
+	</div>
+	<div class="modal-footer">
+		<a href="#" class="btn" data-dismiss="modal">No</a>
+	    <a href="logout.php" class="btn btn-primary">Yes</a>
+	</div>
+</div>
+
+<div class="modal hide fade" id="sched_form_modal">
+	
+</div>
+
+<script type="text/javascript">
+	$(document).ready(function() {
+		get_courses();
+		$( "#sy-sem-button" ).click(function() {
+			$("#blocks, #subjects, #subject_info, #courses").hide();
+			get_courses();
+		});
+		
+	});
+	
+	function get_courses(){
+		$.ajax({
+			url: "ajax_function.php",
+			data: {function_name : 'get_courses'},
+			type: 'post',
+			dataType: 'json',
+			success: function(result){
+				if(result.status == "success"){
+					html = "";
+					$.each(result.data, function (key, data) {
+						html += '<a href="#" class="list-group-item course_item" course-id="'+data.course_id+'">'+data.course_name+'</a>'
+					});
+					$("#courses").show();
+					$("#list_of_courses").html(html);
+					$( ".course_item" ).click(function() {
+						$("#blocks, #subjects, #subject_info").hide();
+						$('.course_item').removeClass('active');
+						$(this).addClass('active');
+						// get_blocks($(this).attr("course-id"));
+						get_years($(this).attr("course-id"));
+					});
+				}
+				else{
+					$("#list_of_courses").html('No course assigned to you');
+				}
+			}
+		})
+	}
+	
+	function get_years(course_id){
+		html = '<a href="#" class="list-group-item year_item" year-level="1">1st Year</a>';
+		html += '<a href="#" class="list-group-item year_item" year-level="2">2nd Year</a>';
+		html += '<a href="#" class="list-group-item year_item" year-level="3">3rd Year</a>';
+		html += '<a href="#" class="list-group-item year_item" year-level="4">4th Year</a>';
+		html += '<a href="#" class="list-group-item year_item" year-level="5">5th Year</a>';
+		
+		$("#list_of_year_level").html(html);
+		$("#year_level_div").show('slide', { direction: 'left' });
+		
+		$( ".year_item" ).click(function() {
+			$("#blocks, #subjects, #subject_info").hide();
+			$('.year_item').removeClass('active');
+			$(this).addClass('active');
+			get_blocks(course_id,$(this).attr("year-level"));
+		});
+		
+	}
+	
+	function get_blocks(course_id,year_level){
+		$.ajax({
+			url: "ajax_function.php",
+			data: {
+					function_name : 'get_blocks', 
+					course_id : course_id, 
+					school_year : $("#SY").val(), 
+					sem : $("#sem").val(), 
+					year_level : year_level
+				},
+			type: 'post',
+			dataType: 'json',
+			success: function(result){
+				if(result.status == "success"){
+					html = "";
+					$.each(result.data, function (key, data) {
+						html += '<a href="#" class="list-group-item block_item" block-id="'+data.id+'">'+data.name+'</a>'
+					});
+					$("#list_of_blocks").html(html);
+					$("#blocks").show('slide', { direction: 'left' });
+					$( ".block_item" ).click(function() {
+						$("#subjects, #subject_info").hide();
+						$('.block_item').removeClass('active');
+						$(this).addClass('active');
+						get_subjects($(this).attr("block-id"),course_id,year_level);
+					});
+				}
+				else{
+					$("#list_of_blocks").html('No block/section for this course');
+					$("#blocks").show('slide', { direction: 'left' });
+				}
+			}
+		});
+	}
+	
+	function get_subjects(block_id, course_id, year_level){
+		$.ajax({
+			url: "ajax_function.php",
+			data: {function_name : 'get_subjects', block_id : block_id, school_year : $("#SY").val(), sem : $("#sem").val(), year_level : year_level, course_id : course_id},
+			type: 'post',
+			dataType: 'json',
+			success: function(result){
+				if(result.status == "success"){
+					html = "";
+					$.each(result.data, function (key, data) {
+						html += '<a href="#" class="list-group-item subject_item" block-id="'+block_id+'" subject-id="'+data.subject_id+'">'+data.description+'<br/> ('+data.subject_code+')</a>'
+					});
+					$("#list_of_subjects").html(html);
+					$("#subjects").show('slide', { direction: 'left' });
+					$( ".subject_item" ).click(function() {
+						$("#subject_info").hide();
+						$('.subject_item').removeClass('active');
+						$(this).addClass('active');
+						get_subject_info(block_id,$(this).attr("subject-id"));
+					});
+				}
+				else{
+					$("#subject_info_div").html('No subject assigned to this block');
+					$("#subject_info").show('slide', { direction: 'left' });
+				}
+			}
+		});
+	}
+	
+	function get_subject_info(block_id, subject_id){
+		$.ajax({
+			url: "ajax_function.php",
+			data: {function_name : 'get_subject_info', block_id : block_id, subject_id : subject_id, school_year : $("#SY").val(), sem : $("#sem").val()},
+			type: 'post',
+			dataType: 'json',
+			success: function(result){
+				if(result.status == "success"){
+					var days = ['monday', 'tuesday','wednesday','thursday','friday','saturday'];
+					
+					var _days = "";
+					$.each(days, function (key, data) {
+						if(result.data[0][data] == 1){
+							_days += (_days == "") ? data.capitalizeFirstLetter() : ', '+data.capitalizeFirstLetter();
+						}
+					});
+					
+					html  = '<table class="table table-striped table-bordered">';
+					html += '	<tr>';
+					html += '		<td>Subject:</td>';
+					html += '		<td>'+result.data[0]['description']+' <br/>('+result.data[0]['subject_code']+')</td>';
+					html += '	</tr>';
+					html += '	<tr>';
+					html += '		<td>Professor:</td>';
+					html += '		<td>'+result.data[0]['prof_name']+'</td>';
+					html += '	</tr>';
+					html += '	<tr>';
+					html += '		<td>Room:</td>';
+					html += '		<td>'+result.data[0]['room_name']+' ('+result.data[0]['room_no']+')</td>';
+					html += '	</tr>';
+					html += '	<tr>';
+					html += '		<td>Days:</td>';
+					html += '		<td>'+_days+'</td>';
+					html += '	</tr>';
+					html += '	<tr>';
+					html += '		<td>From:</td>';
+					html += '		<td>'+result.data[0]['from']+'</td>';
+					html += '	</tr>';
+					html += '	<tr>';
+					html += '		<td>To:</td>';
+					html += '		<td>'+result.data[0]['to']+'</td>';
+					html += '	</tr>';
+					html += '	<tr>';
+					html += '		<td><a href="#" onclick="edit_subject_sched('+block_id+','+subject_id+')">Edit</a></td>';
+					html += '	</tr>';
+					html += '</table">';
+					$("#subject_info_div").html(html);
+					$("#subject_info").show('slide', { direction: 'left' });
+					
+				}
+				else{
+					$("#subject_info_div").html('No info for this subject <br/><br/> Click <a href="#" onclick="assign_sched('+block_id+','+subject_id+')">here</a> to assign room, time and prof.');
+					$("#subject_info").show('slide', { direction: 'left' });
+				}
+			}
+		});
+	}
+	
+	function edit_subject_sched(block_id, subject_id){
+		$.ajax({
+			url: "ajax_function.php",
+			data: {function_name : 'edit_sched_form', block_id : block_id, subject_id : subject_id, school_year : $("#SY").val(), sem : $("#sem").val()},
+			type: 'post',
+			dataType: 'html',
+			success: function(result){
+				$("#sched_form_modal").html(result);
+				$("#sched_form_modal").modal();
+				$("#sched_form_modal").css({width:'80%', left: '30%'});
+				$('.datepicker').timepicker({ 'step': 5,'timeFormat': 'h:i A' });
+				$('#datepicker_div').datepair();
+				
+				$( ".sched_form_days" ).click(function() {
+					if($(".sched_form_days:checked").length > 0 && $("#time_to").val() != "" && $("time_to").val() != ""){
+						get_available_rooms();
+						get_available_profs();
+					}
+				});
+				$( "#time_from, #time_to" ).change(function() {
+					if($(".sched_form_days:checked").length > 0 && $("#time_to").val() != "" && $("time_to").val() != ""){
+						get_available_rooms();
+						get_available_profs();
+					}
+				});
+				
+				$('#sched_form').ajaxForm({
+					dataType: 'json',
+					beforeSubmit: function(){
+						$("#error_message").html("");
+					},
+					success: function(response){
+						if(response.status == "success"){
+							$("#sched_form_modal").modal('hide');
+							$("#subject_info").hide();
+							get_subject_info(block_id,subject_id);
+						}
+						else{
+							$("#error_message").html(response.message);
+						}
+					}
+				}); 
+			}
+		});
+	}
+	
+	function assign_sched(block_id, subject_id){
+		$.ajax({
+			url: "ajax_function.php",
+			data: {function_name : 'get_sched_form', block_id : block_id, subject_id : subject_id, school_year : $("#SY").val(), sem : $("#sem").val()},
+			type: 'post',
+			dataType: 'html',
+			success: function(result){
+				$("#sched_form_modal").html(result);
+				$("#sched_form_modal").modal();
+				$("#sched_form_modal").css({width:'80%', left: '30%'});
+				$('.datepicker').timepicker({ 'step': 5,'timeFormat': 'h:i A' });
+				$('#datepicker_div').datepair();
+				
+				$( ".sched_form_days" ).click(function() {
+					if($(".sched_form_days:checked").length > 0 && $("#time_to").val() != "" && $("time_to").val() != ""){
+						get_available_rooms();
+						get_available_profs();
+					}
+				});
+				$( "#time_from, #time_to" ).change(function() {
+					if($(".sched_form_days:checked").length > 0 && $("#time_to").val() != "" && $("time_to").val() != ""){
+						get_available_rooms();
+						get_available_profs();
+					}
+				});
+				
+				$('#sched_form').ajaxForm({
+					dataType: 'json',
+					beforeSubmit: function(){
+						$("#error_message").html("");
+					},
+					success: function(response){
+						if(response.status == "success"){
+							$("#sched_form_modal").modal('hide');
+							$("#subject_info").hide();
+							get_subject_info(block_id,subject_id);
+						}
+						else{
+							$("#error_message").html(response.message);
+						}
+					}
+				}); 
+			}
+		});
+	}
+	
+	function get_available_profs(){
+		$("#prof_select_div").hide();
+		var selected = [];
+		$('.sched_form_days:checked').each(function() {
+			selected.push($(this).val());
+		});
+		
+		$.ajax({
+			url: "ajax_function.php",
+			data: {function_name : 'get_available_profs', days : selected, time_from: $("#time_from").val(), time_to : $("#time_to").val() , school_year : $("#SY").val(), sem : $("#sem").val()},
+			type: 'post',
+			dataType: 'json',
+			success: function(result){
+				if(result.status == "success"){
+					options = '';
+					$.each(result.data, function (key, data) {
+						options += '<option value="'+data.emp_no+'">'+data.fname+' '+data.mname+' '+data.lname+'</option>';
+					});
+					$("#prof_select").html(options);
+					$("#prof_select_div").show();
+				}
+			}
+		});
+	}
+	
+	function get_available_rooms(){
+		$("#room_select_div").hide();
+		var selected = [];
+		$('.sched_form_days:checked').each(function() {
+			selected.push($(this).val());
+		});
+		
+		$.ajax({
+			url: "ajax_function.php",
+			data: {function_name : 'get_available_rooms', days : selected, time_from: $("#time_from").val(), time_to : $("#time_to").val(), school_year : $("#SY").val(), sem : $("#sem").val()},
+			type: 'post',
+			dataType: 'json',
+			success: function(result){
+				if(result.status == "success"){
+					options = '';
+					$.each(result.data, function (key, data) {
+						options += '<option value="'+data.room_id+'">'+data.room_name+' ('+data.room_no+')</option>';
+					});
+					$("#room_select").html(options);
+					$("#room_select_div").show();
+				}
+			}
+		});
+	}
+	
+	function capitalizeFirstLetter(string) {
+		return string.charAt(0).toUpperCase() + string.slice(1);
+	}
+	
+	String.prototype.capitalizeFirstLetter = function() {
+		return this.charAt(0).toUpperCase() + this.slice(1);
+	}
+</script>

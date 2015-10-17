@@ -1,0 +1,58 @@
+<?php
+session_start();
+include('connection.php');
+
+$username=$_POST['username'];
+$password=$_POST['password'];
+
+if(!empty($username) && !empty($password))
+	{
+
+		$command="select * from user WHERE  username = '".$username."' and password='".$password."'";
+		$result1=mysql_query($command);
+		$count=mysql_num_rows($result1);
+		
+		$utype_id = "SELECT utype_id FROM user WHERE username='$username'";
+        $result2 = mysql_query($utype_id);
+        $result3 = mysql_fetch_row($result2);
+		
+		if($count==0)
+		{
+			header("location:login.php?attempt=fail");
+		}
+		else{
+			$sql="select * from user WHERE username='".$username."'";
+			$result=mysql_query($sql);
+			while($row=mysql_fetch_row($result)){
+					// die(_a($row));
+					$_SESSION["id"]=$row[0];
+					$_SESSION["dept_id"]=$row[3];
+					$_SESSION["username"]=$row[6];
+										
+				switch($result3[0]){
+
+                        case '1':
+							header("location:dean/home.php");
+                        break;
+						
+						case '2':
+							header("location: registrar/home.php");
+                        break;
+						
+						case '3':
+							header("location:faculty/home.php");
+                        break;
+
+                        default:
+							header("location:login.php?attempt=unauthorized");
+                        break;
+
+                    }
+			}
+		}
+	}
+else
+	{
+		header("location:login.php?attempt=null");
+	}
+?>
