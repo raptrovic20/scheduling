@@ -199,13 +199,18 @@
 						$("#error_message").html("");
 					},
 					success: function(response){
-						if(response.status == "success"){
-							$("#sched_form_modal").modal('hide');
-							$("#subject_info").hide();
-							get_subject_info(block_id,subject_id);
-						}
-						else{
-							$("#error_message").html(response.message);
+						if(response.conflicted == "true"){
+							html = "Conflicted\n\n";
+							$.each(response.conflicted_data, function (key, data) {
+								html += data.subject_desc+'( '+data.subject_code+')\n\n';
+								$.each(data.days, function (a, b) {
+									console.log(b);
+									// $.each(b, function (c, d) {
+										// console.log(d);
+									// });
+								});
+							});
+							alert(html);
 						}
 					}
 				}); 

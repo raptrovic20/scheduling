@@ -96,6 +96,8 @@
 						</tr>';
 			while($row=mysql_fetch_assoc($result)){
 				echo '<input type="hidden" name="subject_id[]" value="'.$row['subject_id'].'">';
+				echo '<input type="hidden" name="'.$row['subject_id'].'[subj_desc]" id="subj_desc" value="'.$row['description'].'">';
+				echo '<input type="hidden" name="'.$row['subject_id'].'[subj_code]" id="subj_code" value="'.$row['subject_code'].'">';
 				echo 	'<tr>';
 				echo 		'<td>'.$row['subject_code'].'</td>';
 				echo 		'<td>'.$row['description'].'</td>';
@@ -607,7 +609,9 @@
 					foreach($post[$_sub]['days'] as $day){
 						if($days[$day] == 1){
 							$conflicted[$subject_id]['subject_id'] = $subject_id;
-							$conflicted[$subject_id]['days'][] = $day;
+							$conflicted[$subject_id]['subject_code'] = $post[$subject_id]['subj_code'];
+							$conflicted[$subject_id]['subject_desc'] = $post[$subject_id]['subj_desc'];
+							$conflicted[$subject_id]['days'][$day] = $day;
 						}
 					}
 				}
