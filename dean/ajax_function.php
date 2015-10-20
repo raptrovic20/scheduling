@@ -85,6 +85,7 @@
 		if(mysql_num_rows($result) > 0){
 			echo '<form action="ajax_function.php" id="sched_form" method="post">';
 			echo '<input type="hidden" name="function_name" id="function_name" value="save_sched">';
+			echo '<input type="hidden" name="block_id" id="block_id_hidden">';
 			echo '<table border="1">
 						<tr>
 							<td style="width:20%">Subject Code</td>
@@ -95,36 +96,74 @@
 							<td style="width:20%">Instructor</td>
 						</tr>';
 			while($row=mysql_fetch_assoc($result)){
+				$sched_sql = '
+						SELECT 
+						  tbl_schedule.`id`,
+						  prof_id,
+						  CONCAT(tbl_faculty.`fname`," ",tbl_faculty.`mname`,"  ",tbl_faculty.`lname`) AS `prof_name`,
+						  tbl_room.room_no,
+						  tbl_room.`room_name`,
+						  tbl_subject.`subject_id`,
+						  tbl_subject.`subject_code`,
+						  tbl_subject.`description`,
+						  tbl_course.`course_name`,
+						  tbl_blocks.`name` AS `block_name`,
+						  monday,
+						  tuesday,
+						  wednesday,
+						  thursday,
+						  friday,
+						  saturday,
+						  `from`,
+						  `to`,
+						  tbl_schedule.room_id,
+						  tbl_schedule.semester,
+						  tbl_schedule.school_year
+						FROM
+						  tbl_schedule
+						  INNER JOIN tbl_faculty ON  tbl_schedule.`prof_id` = `tbl_faculty`.`emp_no`
+						  INNER JOIN tbl_room ON tbl_schedule.`room_id` = tbl_room.`room_id`
+						  INNER JOIN tbl_subject ON tbl_schedule.`subject_id` = tbl_subject.`subject_id`
+						  INNER JOIN tbl_blocks ON tbl_schedule.`block_id` = tbl_blocks.`id`
+						  INNER JOIN tbl_course ON tbl_blocks.`course_id` = tbl_course.`course_id`
+						WHERE block_id = '.$_POST['block_id'].' 
+						  AND tbl_schedule.subject_id = '.$row['subject_id']. ' and tbl_schedule.school_year = '.$_SESSION['school_year']. ' and tbl_schedule.semester = '.$_SESSION['semester'];
+				$sched_result = mysql_query($sched_sql);
+				$sched_row=mysql_fetch_assoc($sched_result);
+				
 				echo '<input type="hidden" name="subject_id[]" value="'.$row['subject_id'].'">';
 				echo '<input type="hidden" name="'.$row['subject_id'].'[subj_desc]" id="subj_desc" value="'.$row['description'].'">';
 				echo '<input type="hidden" name="'.$row['subject_id'].'[subj_code]" id="subj_code" value="'.$row['subject_code'].'">';
+				echo '<input type="hidden" name="'.$row['subject_id'].'[sched_id]" id="sched_id" value="'.$sched_row['id'].'">';
 				echo 	'<tr>';
 				echo 		'<td>'.$row['subject_code'].'</td>';
 				echo 		'<td>'.$row['description'].'</td>';
 				echo 		'<td>
 								<div class="datepicker_div">
-									<input name="'.$row['subject_id'].'[time_from]" value="" type="text" readonly="readonly" class="datepicker time start time_start">
-									<input name="'.$row['subject_id'].'[time_to]" value="" type="text" readonly="readonly" class="datepicker time end time_end">
+									<input name="'.$row['subject_id'].'[time_from]" value="'.$sched_row['from'].'" type="text" readonly="readonly" class="datepicker time start time_start">
+									<input name="'.$row['subject_id'].'[time_to]" value="'.$sched_row['to'].'" type="text" readonly="readonly" class="datepicker time end time_end">
 								<div>
 							</td>';
 				echo 		'<td>
-								<input name="'.$row['subject_id'].'[days][]" class="sched_form_days" value="monday" type="checkbox"> Monday<br/> 
-								<input name="'.$row['subject_id'].'[days][]" value="tuesday" type="checkbox"> Tuesday<br/> 
-								<input name="'.$row['subject_id'].'[days][]" value="wednesday" type="checkbox"> Wednesday<br/> 
-								<input name="'.$row['subject_id'].'[days][]" value="thursday" type="checkbox"> Thursday<br/> 
-								<input name="'.$row['subject_id'].'[days][]" value="friday" type="checkbox"> Friday<br/> 
-								<input name="'.$row['subject_id'].'[days][]" value="saturday" type="checkbox"> Saturday</td>';
+								<input '.(($sched_row['monday']) == 1 ? ' checked ': "") .' name="'.$row['subject_id'].'[days][]" class="sched_form_days" value="monday" type="checkbox"> Monday<br/> 
+								<input '.(($sched_row['tuesday']) == 1 ? ' checked ': "") .' name="'.$row['subject_id'].'[days][]" value="tuesday" type="checkbox"> Tuesday<br/> 
+								<input '.(($sched_row['wednesday']) == 1 ? ' checked ': "") .' name="'.$row['subject_id'].'[days][]" value="wednesday" type="checkbox"> Wednesday<br/> 
+								<input '.(($sched_row['thursday']) == 1 ? ' checked ': "") .' name="'.$row['subject_id'].'[days][]" value="thursday" type="checkbox"> Thursday<br/> 
+								<input '.(($sched_row['friday']) == 1 ? ' checked ': "") .' name="'.$row['subject_id'].'[days][]" value="friday" type="checkbox"> Friday<br/> 
+								<input '.(($sched_row['saturday']) == 1 ? ' checked ': "") .' name="'.$row['subject_id'].'[days][]" value="saturday" type="checkbox"> Saturday</td>';
 				echo 		'<td>
 								<select style="width:100%" id="room_select" name="'.$row['subject_id'].'[room_select]">';
 					foreach($rooms as $room){
-						echo 		'<option value="'.$room['room_id'].'">'.$room['room_name'].' ('.$room['room_no'].')</option>';
+						$selected = ($room['room_id'] == $sched_row['room_id']) ? 'selected = "selected"' : "";
+						echo 		'<option '.$selected.' value="'.$room['room_id'].'">'.$room['room_name'].' ('.$room['room_no'].')</option>';
 					}
 				echo			'</select>
 							</td>';
 				echo 		'<td>
 								<select style="width:100%" id="prof_select" name="'.$row['subject_id'].'[prof_select]">';
 					foreach($profs as $prof){
-						echo 		'<option value="'.$prof['emp_no'].'">'.$prof['fname'].' '.$prof['mname'].' '.$prof['lname'].'</option>';
+						$selected = ($prof['emp_no'] == $result['prof_id']) ? 'selected = "selected"' : "";
+						echo 		'<option '.$selected.' value="'.$prof['emp_no'].'">'.$prof['fname'].' '.$prof['mname'].' '.$prof['lname'].'</option>';
 					}
 				echo			'</select>
 							</td>';
@@ -620,6 +659,113 @@
 		
 		if(count($conflicted) > 0){
 			$response['conflicted'] = "true";
+		}
+		else{
+			foreach($post['subject_id'] as $subject_id){
+				foreach($post[$subject_id]['days'] as $day){
+					$day_where .= ($day_where == "") ? $day .' = 1 ' : ' or '.$day .' = 1 ';
+				}
+				$conflict_query = '
+					SELECT 
+					  * 
+					FROM
+					  `tbl_schedule` 
+					WHERE (
+						'.$day_where.'
+					  ) 
+					  AND (
+						CAST(`from` AS TIME) >= STR_TO_DATE("'.$post[$subject_id]['time_from'].'", "%h:%i%p") 
+						AND CAST(`from` AS TIME) < STR_TO_DATE("'.$post[$subject_id]['time_to'].'", "%h:%i%p") 
+						OR CAST(`to` AS TIME) >= STR_TO_DATE("'.$post[$subject_id]['time_from'].'", "%h:%i%p") 
+						AND CAST(`to` AS TIME) < STR_TO_DATE("'.$post[$subject_id]['time_to'].'", "%h:%i%p")
+					  ) 
+					  and school_year = '.$_SESSION['school_year'].' and semester = '.$_SESSION['semester'].' and block_id != '.$post['block_id'].'
+					  and room_id = '.$post[$subject_id]['room_select'].' and prof_id = '.$post[$subject_id]['prof_select'];
+				$res = mysql_query($conflict_query);
+				if(mysql_num_rows($res) > 0){
+					$conflicted[$subject_id]['subject_id'] = $subject_id;
+					$conflicted[$subject_id]['subject_code'] = $post[$subject_id]['subj_code'];
+					$conflicted[$subject_id]['subject_desc'] = $post[$subject_id]['subj_desc'];
+					$conflicted[$subject_id]['days'][$day] = $day;
+				}
+			}
+		}
+		
+		if(count($conflicted) > 0){
+			$response['conflicted'] = "true";
+		}
+		else{
+			foreach($post['subject_id'] as $subject_id){
+				foreach($post[$subject_id]['days'] as $day){
+					$days = array('monday' => 0, 'tuesday' => 0, 'wednesday' => 0 , 'thursday' => 0, 'friday' => 0, 'saturday' => 0);
+					
+					foreach($post[$subject_id]['days'] as $day){
+						$days[$day] = 1;
+					}
+					
+					if(isset($post[$subject_id]['sched_id']) and $post[$subject_id]['sched_id'] != ""){
+						$update = 'update 
+									tbl_schedule 
+									set 
+									block_id = '.$post['block_id'].',
+									subject_id = '.$subject_id.',
+									prof_id = '.$post[$subject_id]['prof_select'].',
+									room_id = '.$post[$subject_id]['room_select'].',
+									monday = '.$days['monday'].',
+									tuesday = '.$days['tuesday'].',
+									wednesday = '.$days['wednesday'].',
+									thursday = '.$days['thursday'].',
+									friday = '.$days['friday'].',
+									saturday = '.$days['saturday'].',
+									`from` = "'.$post[$subject_id]['time_from'].'",
+									`to` = "'.$post[$subject_id]['time_to'].'",
+									semester = '.$_SESSION['semester'].',
+									school_year = '.$_SESSION['school_year'].'
+									where id = '.$post[$subject_id]['sched_id'].'
+								';
+						$result = mysql_query($update);
+						$response['status'] = 'success';
+					}
+					else{
+						$insert = '
+						INSERT INTO tbl_schedule (
+												block_id,
+												subject_id,
+												prof_id,
+												room_id,
+												monday,
+												tuesday,
+												wednesday,
+												thursday,
+												friday,
+												saturday,
+												`from`,
+												`to`,
+												semester,
+												school_year
+											) 
+											VALUES
+											(
+												'.$post['block_id'].',
+												'.$subject_id.',
+												'.$post[$subject_id]['prof_select'].',
+												'.$post[$subject_id]['room_select'].',
+												'.$days['monday'].',
+												'.$days['tuesday'].',
+												'.$days['wednesday'].',
+												'.$days['thursday'].',
+												'.$days['friday'].',
+												'.$days['saturday'].',
+												"'.$post[$subject_id]['time_from'].'",
+												"'.$post[$subject_id]['time_to'].'",
+												'.$_SESSION['semester'].',
+												'.$_SESSION['school_year'].'
+											)
+						';
+						$result = mysql_query($insert);
+					}
+				}
+			}
 		}
 		
 		$response['conflicted_data'] = $conflicted;

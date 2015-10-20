@@ -113,7 +113,8 @@
 <script type="text/javascript">
 	$(document).ready(function() {
 		get_courses();
-		$( "#save_schedule_button" ).click(function() {
+		$( "#save_schedule_button" ).click(function(){
+			$("#block_id_hidden").val($("#block_select").val());
 			$("#sched_form").submit();
 		});
 		
