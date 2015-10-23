@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 22, 2015 at 03:43 PM
+-- Generation Time: Oct 23, 2015 at 02:55 PM
 -- Server version: 5.5.27
 -- PHP Version: 5.4.7
 
@@ -104,7 +104,7 @@ CREATE TABLE IF NOT EXISTS `tbl_dean` (
   `department_id` int(11) DEFAULT NULL,
   `department` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`emp_no`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=18 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=17 ;
 
 --
 -- Dumping data for table `tbl_dean`
@@ -335,7 +335,7 @@ CREATE TABLE IF NOT EXISTS `user` (
   `contact` varchar(100) NOT NULL,
   `date` varchar(50) CHARACTER SET latin1 COLLATE latin1_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=62 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=63 ;
 
 --
 -- Dumping data for table `user`
@@ -345,7 +345,8 @@ INSERT INTO `user` (`id`, `utype_id`, `dean_id`, `faculty_id`, `name`, `departme
 (51, 2, NULL, NULL, 'wilbur ramos', NULL, 'accounting', 'book keeper', 'Registrar', 'admin', 'Laguindingan, Misamis Oriental', '09358944967', '2013-03-04'),
 (58, 1, 15, NULL, 'Dean number 1', 30, NULL, 'Dean number 1', 'dean1', 'dean1', 'Dean number 1', 'Dean number 1', NULL),
 (59, 1, 16, NULL, 'Dean number 2', 31, NULL, 'Dean number 2', 'dean2', 'dean2', 'Dean number 2', 'Dean number 2', NULL),
-(61, 3, NULL, 15, 'Arvee Alonzo Villanueva', NULL, NULL, '', 'arvee', 'arvee', '', '', NULL);
+(61, 3, NULL, 15, 'Arvee Alonzo Villanueva', NULL, NULL, '', 'arvee', 'arvee', '', '', NULL),
+(62, 3, NULL, 11, '', NULL, NULL, '', 'raphael', 'raphael', '', '', NULL);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

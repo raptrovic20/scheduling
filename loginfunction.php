@@ -34,7 +34,7 @@ if(!empty($username) && !empty($password)){
 			break;
 			
 			case '3':
-				$_SESSION["faculty_id"] = $row['id'];
+				$_SESSION["faculty_id"] = $row['faculty_id'];
 				header("location:faculty/home.php");
 			break;
 			default:

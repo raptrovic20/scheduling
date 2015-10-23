@@ -86,8 +86,8 @@ popupWindow =window.open('prints.php',"_blank","directories=no, status=no, menub
 								  tbl_subject.`description`,
 								  tbl_department.`department_name` AS `college_offering`,
 								  tbl_department.`department_code` AS `college_offering_code`,
-								  tbl_subject.`labunit`,
-								  tbl_subject.`lecunit`,
+								  tbl_subject.`type`,
+								  tbl_subject.`unit`,
 								  tbl_blocks.`name`,
 								  tbl_schedule.`from`,
 								  tbl_schedule.`to`,
@@ -112,6 +112,7 @@ popupWindow =window.open('prints.php',"_blank","directories=no, status=no, menub
 								  LEFT JOIN tbl_department 
 									ON tbl_course.`department_id` = tbl_department.`department_id` 
 								   INNER JOIN `tbl_room` ON tbl_schedule.`room_id` = tbl_room.`room_id` where tbl_schedule.prof_id = '.$_SESSION['faculty_id'];
+								   // die($query);
 						$result=mysql_query($query)or die(mysql_error());
 						while($row=mysql_fetch_assoc($result)){
 							echo '<tr class="del'.$row['id'].'">';
@@ -119,7 +120,7 @@ popupWindow =window.open('prints.php',"_blank","directories=no, status=no, menub
 							echo '	<td>'.$row['subject_code'].'</td>';
 							echo '	<td>'.$row['description'].'</td>';
 							echo '	<td>'.$row['college_offering_code'].'</td>';
-							echo '	<td>'.$row['lecunit'].'/'.$row['labunit'].'</td>';
+							echo '<td>'.$row['unit'].'</td>';
 							echo '	<td>'.$row['name'].'</td>';
 							echo '	<td>sched</td>';
 							echo '	<td>'.$row['room_name'].' ('.$row['room_no'].')</td>';
