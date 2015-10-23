@@ -125,7 +125,7 @@ while($dep=mysql_fetch_array($query)){
     </div>
     </div>
 	
-	<!--<div class="control-group">
+	<div class="control-group">
 		<label class="control-label" for="input01">Year:</label>
 		<div class="controls">
 			<select name="semester" id="span9009">
@@ -134,8 +134,8 @@ while($dep=mysql_fetch_array($query)){
 				<option value="3" <?php echo ($row['semester'] == 3)? 'selected="selected"' : '' ?>>3rd Semester</option>
 			</select>
 		</div>
-    </div>-->
-	<input type="hidden" value="<?php echo $row['semester'] ?>">
+    </div>
+	<!--<input type="hidden" value="<?php echo $row['semester'] ?>">-->
 	
 
 

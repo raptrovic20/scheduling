@@ -125,6 +125,17 @@ popupWindow =window.open('prints.php',"_blank","directories=no, status=no, menub
 								   ';
 						$result=mysql_query($query)or die(mysql_error());
 						while($row=mysql_fetch_assoc($result)){
+							
+							$days = array('monday','tuesday','wednesday','thursday','friday','saturday');
+			
+							$sched = "";
+							foreach($days as $day){
+								if($row[$day] == 1){
+									$sched .= $day.'<br/>';
+								}
+							}
+							$sched .= $row['from'].' to '.$row['to'];
+											
 							echo '<tr class="del'.$row['id'].'">';
 							echo '	<td>'.$row['instructor'].'</td>';
 							echo '	<td>'.$row['subject_code'].'</td>';
@@ -133,7 +144,7 @@ popupWindow =window.open('prints.php',"_blank","directories=no, status=no, menub
 							echo '	<td>'.$row['college_offering_code'].'</td>';
 							echo '<td>'.$row['unit'].'</td>';
 							echo '	<td>'.$row['name'].'</td>';
-							echo '	<td>sched</td>';
+							echo '	<td>'.$sched.'</td>';
 							echo '	<td>'.$row['room_name'].' ('.$row['room_no'].')</td>';
 							echo '</tr>';
 						}

@@ -7,7 +7,8 @@ $password=$_POST['password'];
 
 if(!empty($username) && !empty($password)){
 	$query = "select user.*, tbl_dean.department_id as `dean_dept_id` from user 
-				LEFT JOIN tbl_dean ON user.`dean_id` = tbl_dean.`emp_no` WHERE  username = '".$username."' and password='".$password."'";
+				LEFT JOIN tbl_dean ON user.`dean_id` = tbl_dean.`emp_no` 
+				WHERE  username = '".$username."' and password='".$password."'";
 	$result = mysql_query($query);
 	$count = mysql_num_rows($result);
 	if($count == 1){
@@ -33,7 +34,7 @@ if(!empty($username) && !empty($password)){
 			break;
 			
 			case '3':
-				$_SESSION["faculty_id"] = $row['faculty_id'];
+				$_SESSION["faculty_id"] = $row['id'];
 				header("location:faculty/home.php");
 			break;
 			default:

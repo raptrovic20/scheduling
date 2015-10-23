@@ -32,6 +32,25 @@ window.location="add_teacher.php";
 mysql_query("insert into tbl_faculty (fname,lname,mname,status,department_name,specialization)
 VALUES('$fname','$lname','$mname','$status','$department_name','$specialization')")or die(mysql_error());
 
+$insert = '
+	insert into user (
+							utype_id,
+							faculty_id,
+							name,
+							username,
+							password
+						)
+						values(
+							3,
+							'.mysql_insert_id().',
+							"'.$fname.' '.$mname.' '.$lname.'",
+							"'.$_POST['username'].'",
+							"'.$_POST['password'].'"
+						)
+	';
+	// die($insert);
+	mysql_query($insert);
+	// die($insert);
 
 header('location:faculty.php');
 

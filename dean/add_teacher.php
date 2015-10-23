@@ -103,6 +103,19 @@ while($dep=mysql_fetch_array($query)){
     <input type="text" name="specialization"  id="span9009">
     </div>
     </div>
+	
+	<div class="control-group">
+		<label class="control-label" for="input01">Username:</label>
+		<div class="controls">
+			<input type="text" name="username" id="span9009">
+		</div>
+    </div>
+	<div class="control-group">
+		<label class="control-label" for="input01">Password:</label>
+		<div class="controls">
+			<input type="password" name="password" id="span9009">
+		</div>
+    </div>
 
 
 	<div class="control-group">

@@ -48,8 +48,61 @@
 	// die(_a($_SESSION));
 ?>
 <h2><font color="white">Academic Year</font></h2>
-	<form action = "" method="post">
 	<hr>
+	<table>
+		<tr>
+			<td><font color="white">School Year</font></td>
+			<td><font color="White">
+				<?php 
+					$sy_query = mysql_query("SELECT * FROM tbl_school_year where id = ".$_SESSION['school_year']) or die(mysql_error());
+					$sy = mysql_fetch_assoc($sy_query);
+					echo $sy['from'].' - '.$sy['to'];
+				?></font>
+			</td>
+		</tr>
+		<tr>
+			<td><font color="White">Semester</font></td>
+			<td><font color="White">
+				<?php
+					$sems = array('1' => '1st Semester', '2' => '2nd Semeseter', '3' => 'Summer');
+					echo $sems[$_SESSION['semester']];
+				?></font>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<input type="submit" value="">
+				<a data-toggle="modal" href="#form"><i class="icon-signout icon-large"></i>Change Academic Setting</a>
+			</td>
+		</tr>
+	</table>
+</div>
+
+
+<?php include('footer.php');?>
+</div>
+</body>
+	<div class="modal hide fade" id="myModal">
+	<div class="modal-header">
+	<button type="button" class="close" data-dismiss="modal">×</button>
+	    <h3> </h3>
+	  </div>
+	  <div class="modal-body">
+	    <p><font color="gray">Are You Sure you Want to LogOut?</font></p>
+	  </div>
+	  <div class="modal-footer">
+	    <a href="#" class="btn" data-dismiss="modal">No</a>
+	    <a href="logout.php" class="btn btn-primary">Yes</a>
+		</div>
+		</div>
+		
+	<div class="modal hide fade" id="form">
+		<div class="modal-header">
+			<h3> </h3>
+			<button type="button" class="close" data-dismiss="modal">×</button>
+		</div>
+		<div class="modal-body">
+			<p><form action = "" method="post">
 	<table>
 		<tr>
 			<td><font color="white">School Year</font></td>
@@ -80,26 +133,12 @@
 		</tr>
 	</table>
 	</form>
-
-</div>
-
-
-<?php include('footer.php');?>
-</div>
-</body>
-	<div class="modal hide fade" id="myModal">
-	<div class="modal-header">
-	<button type="button" class="close" data-dismiss="modal">×</button>
-	    <h3> </h3>
-	  </div>
-	  <div class="modal-body">
-	    <p><font color="gray">Are You Sure you Want to LogOut?</font></p>
-	  </div>
-	  <div class="modal-footer">
-	    <a href="#" class="btn" data-dismiss="modal">No</a>
-	    <a href="logout.php" class="btn btn-primary">Yes</a>
+		</p>
 		</div>
+		<div class="modal-footer">
+			<a href="#" class="btn" data-dismiss="modal">Close</a>
 		</div>
+	</div>
 			<script type="text/javascript">
 	$(document).ready( function() {
 	

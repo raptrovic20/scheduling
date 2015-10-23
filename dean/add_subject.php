@@ -95,18 +95,18 @@
 	</select>
     </div>
     </div>
-	<input type="hidden" name="semester" value="<?php echo $_SESSION['semester'] ?>">
+	<!--input type="hidden" name="semester" value="<?php echo $_SESSION['semester'] ?>"!-->
 	<input type="hidden" name="school_year" value="<?php echo $_SESSION['school_year'] ?>">
-	<!--<div class="control-group">
+	<div class="control-group">
 		<label class="control-label" for="input01">Semester:</label>
 		<div class="controls">
 			<select name="semester" id="span9009" required>
 				<option value="1">1st Semester</option>
 				<option value="2">2nd Semester</option>
-				<option value="3">3rd Semester</option>
+				<option value="3">Summer</option>
 			</select>
 		</div>
-    </div>-->
+    </div>
 	
 	
 	
